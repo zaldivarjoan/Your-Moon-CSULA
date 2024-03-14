@@ -1,3 +1,7 @@
+<script setup>
+import config from "../../config/config.json";
+const default_mailto = `mailto:${config.contact_email}`;
+</script>
 <template>
   <div class="container">
     <div class="screen">
@@ -7,7 +11,7 @@
         </div>
         <div class="card-body d-flex justify-content-center align-items-center flex-column">
           <h3>
-            <a href="mailto:Example@email.com" class="email-link">moontrekcsula@gmail.com</a>
+            <a :href="default_mailto" class="email-link">{{ config.contact_email }}</a>
           </h3>
         </div>
         <div class="contact-form">
@@ -34,8 +38,6 @@
     </div>
   </div>
 </template>
-
-
 <script>
 export default {
   data() {
@@ -45,7 +47,7 @@ export default {
   },
   methods: {
     sendMessage() {
-      const email = "moontrekcsula@gmail.com"; // Replace with actual email
+      const email = config.contact_email;
       const subject = "Message from Contact form";
       const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(
         subject
@@ -90,12 +92,6 @@ p {
   width: calc(80%);
 }
 
-.card-body{
-  text-align: center;
-  width: 100%;
-  margin:10px 0;
-}
-
 .contact-form-group {
   margin-bottom: 15px;
   text-align: center;
@@ -105,7 +101,7 @@ p {
   text-transform: inherit;
 }
 .contact-form-group.message {
-  margin-top: 10px;
+  margin-top: 40px;
 }
 .contact-form-group.buttons {
   margin-bottom: 0;
@@ -124,7 +120,7 @@ p {
 .contact-form-button {
   background: none;
   border: none;
-  color: #ceced3;
+  color: #4d4d4f;
   font-size: 16px;
   cursor: pointer;
   outline: none;
@@ -144,14 +140,5 @@ p {
   text-transform: capitalize;
   outline: none;
   transition: border-color 0.2s;
-}
-
-.email-link{
-  color: #5e81ac;
-  text-decoration: none;
-}
-
-.email-link:hover{
-  color: #ffffff;
 }
 </style>
