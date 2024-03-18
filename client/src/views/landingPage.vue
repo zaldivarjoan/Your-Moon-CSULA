@@ -1,9 +1,13 @@
 <script setup>
 import config from "../../config/config.json";
-import { useAuthStore } from "@/stores/authStore.js";
-import { ref } from "vue";
+import { onBeforeMount, ref } from "vue";
+import Cookies from "js-cookie";
+const authenticated = ref(false);
 
-const auth = useAuthStore();
+onBeforeMount(() => {
+  authenticated.value = Cookies.get("token") ? true : false;
+});
+
 const isExpanded = ref(false);
 const isOptIn = ref(false);
 
@@ -68,7 +72,7 @@ function toggleExpand() {
           <!-- RightHand Column -->
           <div class="col-xs-6 col-md-4">
             <!-- Upload Card -->
-            <div v-if="!auth.isAuthenticated" class="card">
+            <div v-if="!authenticated" class="card">
               <div class="card-header text-left">UPLOAD YOUR MOON</div>
               <div
                 class="card-body d-flex justify-content-center align-items-center flex-column"

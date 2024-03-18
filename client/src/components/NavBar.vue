@@ -1,9 +1,26 @@
 <script setup>
 import { ref } from "vue";
-import { useAuthStore } from "@/stores/authStore.js";
 
+import { onBeforeMount } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/authStore.js";
+import Cookies from "js-cookie";
+
+const router = useRouter();
+const authenticated = ref(false);
 const auth = useAuthStore();
+
+onBeforeMount(() => {
+  authenticated.value = Cookies.get("token") ? true : false;
+});
+
 const isBurgerActive = ref(false);
+
+const logout = () => {
+  auth.signOut();
+  window.location.reload();
+  router.push({ path: "/" });
+};
 
 const toggleBurger = () => {
   isBurgerActive.value = !isBurgerActive.value;
@@ -12,7 +29,7 @@ const toggleBurger = () => {
 
 <template>
   <nav class="navbar navbar-expand-lg">
-    <RouterLink to="/" class="navbar-brand">
+    <a href="/" class="navbar-brand">
       <img
         src="../assets/moon_phase.gif"
         alt="moon gif"
@@ -20,7 +37,7 @@ const toggleBurger = () => {
       />
       <span class="brand-your" style="color: #ffb703">Your</span>
       <span class="brand-moon" style="color: #fefae0">Moon</span>
-    </RouterLink>
+    </a>
 
     <button
       class="navbar-toggler"
@@ -38,16 +55,16 @@ const toggleBurger = () => {
     >
       <ul class="nav navbar-nav">
         <li class="nav-item">
-          <router-link class="nav-link" to="/">Home</router-link>
+          <a class="nav-link" href="/">Home</a>
         </li>
-        <li v-if="auth.isAuthenticated" class="nav-item">
-          <RouterLink class="nav-link" to="/upload">Upload</RouterLink>
+        <li v-if="authenticated" class="nav-item">
+          <a class="nav-link" href="/upload">Upload</a>
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/contact">Contact</router-link>
+          <a class="nav-link" href="/contact">Contact</a>
         </li>
-        <li v-if="auth.isAuthenticated" class="nav-item">
-          <a class="nav-link" @click="auth.logout">Logout</a>
+        <li v-if="authenticated" class="nav-item">
+          <a class="nav-link" @click="logout">Logout</a>
         </li>
       </ul>
     </div>
@@ -60,6 +77,10 @@ const toggleBurger = () => {
   padding: 0.5rem 1rem;
   font-weight: bold;
   color: #ffffff;
+}
+
+.nav-item {
+  cursor: pointer;
 }
 .navbar-brand {
   font-size: 1.5rem;
