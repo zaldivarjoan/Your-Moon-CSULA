@@ -353,6 +353,7 @@ async function updateMetaData() {
       const temp_date = `${year}-${month}-${day}`;
       data.date = temp_date;
       data.time = timePart;
+      data.timeStamp = Date.parse(`${data.date} ${data.time}`);
     }
     if (tags.Make && tags.Model) {
       //As of now this only captures camera make and model
@@ -377,8 +378,8 @@ async function updateMetaData() {
 //                    return: { "type": "rectangle", "x1": int, "y1": int, "x2": int, "y2": int }
 //   * returns from MoonDetection() will be receive & process by this.onMoonPositionUpdatse()
 async function RunDetectMoon(_fileObject, _type = "square") {
+  let image_handler = new ImageHandler();
   try {
-    let image_handler = new ImageHandler();
     await image_handler.load_from_fileobject(_fileObject);
     let circle = await detect_moon(image_handler);
     
@@ -399,6 +400,8 @@ async function RunDetectMoon(_fileObject, _type = "square") {
 
   } catch (err) {
     data.message = err;
+  } finally {
+    await image_handler.destroy_image();
   }
 }
 // function that gets the cropped image and sends it to server-side
@@ -407,7 +410,11 @@ async function uploadCroppedImage() {
     //update lat and lon to nearest city
     updateCoordinates(data.nearestCity, data.countryCode);
     // make post request to upload image to database
-    let img_filename = `${data.imageHash}.${data.file.type.split("/")[1]}`;
+    if (!data.timeStamp || data.timeStamp.length <= 0) {
+      data.timeStamp = Date.parse(`${data.date} ${data.time}`);
+    }
+    let current_timestamp = String(Date.now());
+    let img_filename = `${data.imageHash}-${current_timestamp}.${data.file.type.split("/")[1]}`;
     let metadata_params = {
       instrument: {
         inst_type: "phone", // TODO: add additional drop-down menu for instrument type. ("phone", "camera", "phone+telescope", "camera+telescope")
@@ -424,7 +431,7 @@ async function uploadCroppedImage() {
         // TODO: derive image's original unix timestamp when taken from geolocation & datetime
         // https://www.npmjs.com/package/geo-tz
         // this should be handle by the server
-        img_timestamp: Math.floor(new Date().getTime() / 1000),
+        img_timestamp: data.timeStamp,
       },
       moon: {
         moon_detect_flag: 1,

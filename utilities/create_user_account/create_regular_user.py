@@ -6,12 +6,15 @@
 #                                                    #
 # ################################################## #
 
+import math
 import traceback
 from datetime import datetime, timedelta
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from base64 import b64encode, b64decode
 from hashlib import md5
+import json
+from time import time
 import jwt
 
 BLOCK_SIZE = 16
@@ -52,15 +55,24 @@ def main():
     user_id = int(input('5) What is the user_id you get? '))
     
     
+    now = math.floor(datetime.now().timestamp())
+    exp = math.floor((datetime.now()+timedelta(days=2)).timestamp())
     output_jwt = jwt.encode(
         {
-            "user_id":user_id, "hashed_email":user_email_md5,
-            "exp": (datetime.now()+timedelta(days=2)).timestamp(),
+            "user_id":user_id,
+            "hashed_email":user_email_md5,
+            "user_type": "regular",
+            "iat": now,
+            "exp": exp,
         },
         jwt_secret,
         algorithm="HS256"
     )
-    output_js = f'document.cookie = "token={output_jwt}";'
+    authstore_str = json.dumps({'signInTime':now})
+    output_js = (
+        f'document.cookie = "token={output_jwt}";\n'
+        f'sessionStorage.setItem(\'AuthStore\', \'{authstore_str}\');'
+    )
     print(f'\n* Here is your JWT token for the frontend:\n\n{output_jwt}\n')
     print(f'* Here is how you can set JWT token with JavaScript:\n\n{output_js}\n')
 

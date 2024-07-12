@@ -6,11 +6,14 @@
 #                                                    #
 # ################################################## #
 
+import math
 import traceback
 from datetime import datetime, timedelta
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from base64 import b64encode, b64decode
+import json
+from time import time
 import jwt
 import uuid
 
@@ -42,15 +45,23 @@ def main():
     user_id = 'sess-'+str(uuid.uuid4())
     jwt_secret = b64decode(input('1) What is the "jwt_secret" in the backend config:\n'))
     
+    now = math.floor(datetime.now().timestamp())
+    exp = math.floor((datetime.now()+timedelta(hours=1)).timestamp())
     output_jwt = jwt.encode(
         {
             "user_id":user_id,
-            "exp": (datetime.now()+timedelta(hours=1)).timestamp(),
+            "user_type": "guest",
+            "iat": now,
+            "exp": exp,
         },
         jwt_secret,
         algorithm="HS256"
     )
-    output_js = f'document.cookie = "token={output_jwt}";'
+    authstore_str = json.dumps({'signInTime':now})
+    output_js = (
+        f'document.cookie = "token={output_jwt}";\n'
+        f'sessionStorage.setItem(\'AuthStore\', \'{authstore_str}\');'
+    )
     print(f'\n* Here is your JWT token for the frontend:\n\n{output_jwt}\n')
     print(f'* Here is how you can set JWT token with JavaScript:\n\n{output_js}\n')
 
